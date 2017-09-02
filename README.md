@@ -20,7 +20,5 @@ The primary goal of this project is to use 2016 baseball statistics from Sean La
 
 ### Software and Libraries
 
-This project uses the following software and R libraries:
-ggplot2;
-ggthemes;
+This project uses the following software and R libraries: ggplot2
 
