@@ -15,13 +15,12 @@ The primary goal of this project is to use 2016 baseball statistics from Sean La
 
 *_CSV - CSV files containing baseball statistics 
 
-*_
+*_SLC_BlueJays_MoneyBall.R - main project file
 
 
 ### Software and Libraries
 
 This project uses the following software and R libraries:
-dplyr;
 ggplot2;
 ggthemes;
-plyr
+
