@@ -1,6 +1,6 @@
 # MoneyBall-Project_R
 
-This folder contains files for the files necessary for an indepth Moneyball analysis.
+This folder contains the necessary files for an indepth Moneyball analysis.
 
 ### Background
 The Oakland Athletics' 2002 season was the team's 35th in Oakland, California. It was also the 102nd season in franchise history. The Athletics finished first in the American League West with a record of 103-59.
