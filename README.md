@@ -1,4 +1,4 @@
-# MoneyBall-Project_R
+# Moneyball Project
 
 This folder contains the necessary files for an indepth Moneyball analysis.
 
