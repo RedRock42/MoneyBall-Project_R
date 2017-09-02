@@ -10,6 +10,14 @@ The Oakland Athletics' 2002 season was the team's 35th in Oakland, California. I
 Goal for this project:
 The primary goal of this project is to use 2016 baseball statistics from Sean Lahaman's Website (http://www.seanlahman.com/baseball-archive/statistics/) to find replacement players for the Toronto BlueJays. The Toronto Blue Jays are in the American League East division along with NY Yankees and Boston Red Soxs, needless to say I have my work cut out for me! 
 
+### Data Files
+*_README.txt - Information about contents of data files.
+
+*_CSV - CSV files containing baseball statistics 
+
+*_
+
+
 ### Software and Libraries
 
 This project uses the following software and R libraries:
