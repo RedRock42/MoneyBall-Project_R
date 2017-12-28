@@ -15,7 +15,7 @@ The primary goal of this project is to use 2016 baseball statistics from Sean La
 
 *_CSV - CSV files containing baseball statistics 
 
-*_SLC_BlueJays_MoneyBall.R - main project file
+*_Toronto_BlueJays_MoneyBall.html - main project file
 
 
 ### Software and Libraries
