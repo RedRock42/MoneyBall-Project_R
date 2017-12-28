@@ -1,0 +1,320 @@
+---
+title: "Toronto BlueJays Moneyball Analyis"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+#Load the Libraries
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+library(ggExtra)
+library(readr)
+library(tibble)
+library(tidyr)
+library(knitr)
+```
+
+
+*Written by Savahnna L. Cunningham*
+
+*Date: December 23, 2017*
+
+# Introduction
+
+MoneyBall Project
+The Oakland Athletics' 2002 season was the team's 35th in Oakland, California. It was also the 102nd season in franchise history. The Athletics finished first in the American League West with a record of 103-59.
+
+Because of the team's smaller revenues, Oakland is forced to find players undervalued by the market, and their system for finding value in undervalued players has proven itself thus far. This approach brought the A's to the playoffs in 2002 and 2003.
+
+The primary goal of this project is to use 2016 baseball statistics from Sean Lahaman's Website (http://www.seanlahman.com/baseball-archive/statistics/) to find replacement players for the Toronto BlueJays. The Toronto Blue Jays are in the American League East division along with NY Yankees and Boston Red Soxs, needless to say I have my work cut out for me!
+
+### Data
+
+I'll be using data from Sean Lahaman's Website a very useful source for baseball statistics. The documentation for the csv files is located in the readme2013.txt file. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Load the Data
+Batting <- read_csv("~/Desktop/MoneyBall/baseballdatabank-2017.1/core/Batting.csv")
+
+View(Batting)
+```
+
+```{r}
+head(Batting)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Check the structure of the data and fix NaN values
+str(Batting)
+Batting$SF <- as.numeric(as.character(Batting$SF))
+Batting$GIDP <- as.numeric(as.character(Batting$GIDP))
+```
+
+
+```{r}
+#Call specific columns with the $ symbol
+#Call the head() of the first 5 rows of the AB(At Bats) column
+head(Batting$AB)
+head(Batting$`2B`)
+```
+
+## Important Baseball Statistics 
+
+*Batting Average* 
+  Batting average (BA) is defined by the number of hits(H) divided by at bats(AB).
+*On Base Percentage*
+On-base percentage is defined by the how frequently a batter reaches base.
+
+OBP=(H+BB+HBP)/(AB+BB+HBP+SF))
+
+where
+H = Hits
+BB = Bases on Balls (Walks)
+HBP = Hit By Pitch
+AB = At bat
+SF = Sacrifice fly
+
+*Slugging Percentage*
+
+Slugging percentage (SLG) is a measure of the batting productivity of a hitter. It is calculated as total bases divided by at bats, through the following formula, where AB is the number of at bats for a given player, and 1B, 2B, 3B, and HR are the number of singles, doubles, triples, and home runs, respectively:
+
+
+SLG = ((1B) + (2 x 2B) + (3 x 3B) + (4 x HR)) / AB
+
+Note: Unlike batting average, slugging percentage gives more weight to extra-base hits such as doubles and home runs, relative to singles. Walks are specifically excluded from this calculation, as a plate appearance that ends in a walk is not counted as an at bat.
+
+
+```{r}
+#Calculate BA Stat
+Batting$BA <- Batting$H / Batting$AB
+
+tail(Batting$BA,5)
+```
+
+```{r}
+#Calculate OBP Stat
+Batting$OBP <- (Batting$H + Batting$BB + Batting$HBP)/
+  (Batting$AB + Batting$BB + Batting$HBP + Batting$SF)
+
+tail(Batting$OBP, 5)
+```
+
+
+```{r}
+#Calculate SLG Stat
+
+#First calculate 1B
+Batting$`1B` <- Batting$H - Batting$`2B` - Batting$`3B` - Batting$HR
+
+#SLG 
+Batting$SLG <- ((Batting$`1B`) + (2 * Batting$`2B`) + (3 * Batting$`3B`) +
+                  (4 * Batting$HR)) / Batting$AB
+
+tail(Batting$SLG,5)
+```
+
+```{r}
+str(Batting)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Load Salary data into a DataFrame
+
+salary <- read_csv("~/Desktop/MoneyBall/baseballdatabank-2017.1/core/Salaries.csv")
+
+```
+
+```{r}
+summary(Batting)
+```
+
+
+Notice we have data from 1871 to 2016 in the dataset to properly join the salary df with the batting df, I'm going to subset the batting df from 1985-2016.
+
+```{r}
+Batting <- subset(Batting,yearID >= 1985)
+summary(Batting)
+```
+
+
+
+```{r}
+#Merge the Batting and Salary dataframes
+combo <- merge(Batting,salary, by=c('playerID','yearID'))
+summary(combo)
+```
+
+Key players Blue Jays lost in 2016 offseason: 1B Edwin Encarnacion, OF Michael Saunders, C Josh Thole
+
+Since a player's position is also very import to consider, I will merge the Fielding data set.
+
+Merge the batting data with the salary and fielding data.
+Since there are players playing multiple years, the data will have repetitions of playerIDs for multiple years, to fix this I will join the data using both playerID and yearID.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#Load field data into a DataFrame
+
+field <- read_csv("~/Desktop/MoneyBall/baseballdatabank-2017.1/core/Fielding.csv")
+tail(field)
+
+```
+
+
+```{r}
+field <- subset(field,yearID >= 1985)
+summary(field)
+```
+
+```{r}
+combo2 <- merge(combo,field, by=c('playerID','yearID'))
+summary(combo2)
+```
+
+
+
+
+```{r}
+lost_players <- subset(combo2, playerID %in% c('encared01','tholejo01','saundmi01'))
+lost_players <- subset(lost_players,yearID == 2016)
+lost_players <- lost_players[,c('playerID','POS','H','2B','3B','HR','OBP','SLG','BA','AB')]
+print(lost_players)
+```
+
+
+
+Find Replacement Players for the key three players Toronto lost in 2016 offseason! 
+Constraints:
+        1. The total combined salary of the three players can not exceed 15 million dollars.
+        2. Their combined number of At Bats (AB) needs to be equal to or greater than the lost players.
+        3. Their mean OBP had to equal to or greater than the mean OBP of the lost players
+        4. Key playing positions must be considered- looking for a great 1B and Catcher! 
+
+
+
+```{r}
+#Filter available players from year 2016
+avail.players <- filter(combo2,yearID==2016)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#plot to check where the salary cap should be with respect to OBP
+ggplot(avail.players,aes(x=OBP,y=salary)) + 
+  geom_point(alpha = 0.6, size = 1) +
+  theme_bw()+
+  ggtitle('Salary vs. OBP') + 
+  theme(text = element_text(size=10)) +
+  labs(x='On Base Percentage (OBP)',y='Salary')
+```
+
+
+```{r}
+#no point in paying above 8 million. There are also a lot of players with OBP==0. So I'll get rid of them too.
+avail.players_update <- filter(avail.players,salary<8000000,OBP>0)
+ggplot(avail.players_update,aes(x=OBP,y=salary)) +
+  geom_point(alpha = 0.6, size = 1.2) +
+  theme_bw()+
+  ggtitle('Salary vs. OBP') + 
+  theme(text = element_text(size=10)) +
+  labs(x='On Base Percentage (OBP)',y='Salary')
+```
+
+
+```{r}
+#sort the players by OBP.
+recruits <- head(arrange(avail.players,desc(OBP)),10)
+recruits <- recruits[,c('playerID','POS','OBP','AB','salary')]
+print(recruits)
+```
+
+
+Results:
+1. Kris Bryant plays OF & 1B, have him play OF
+2. Brandon Belt plays 1B and although has a lower AB number, his OBP is nearly 0.4! 
+3. No Catcher on this list, need to re-evaluate specifically for catchers. 
+
+Thus far, I have spent $6,852,000 and have $8,148,000 remaining to find an awesome Catcher!
+
+```{r}
+#Hunt for a Catcher
+avail.catchers<- filter(combo2,yearID==2016 & POS=="C")
+ggplot(avail.catchers,aes(x=OBP,y=salary)) + 
+  geom_point(alpha = 0.6, size = 1.2) +
+  theme_bw()+
+  ggtitle('Available Catchers: Salary vs. OBP') + 
+  theme(text = element_text(size=10)) +
+  labs(x='On Base Percentage (OBP)',y='Salary')
+
+```
+
+```{r}
+avail.catchers<- filter(combo2,yearID==2016 & POS=="C")
+ggplot(avail.catchers,aes(x=OBP,y=salary)) + 
+  geom_point(alpha = 0.6, size = 1.2) +
+  theme_bw()+
+  ggtitle('Available Catchers: Salary vs. OBP') + 
+  theme(text = element_text(size=10)) +
+  labs(x='On Base Percentage (OBP)',y='Salary')
+```
+
+
+```{r}
+avail.catchers <- filter(avail.catchers,salary<8000000,OBP>0)
+avail.catchers <- filter(avail.catchers,AB >= 300)
+ggplot(avail.catchers,aes(x=OBP,y=salary)) + 
+  geom_point(alpha = 0.6, size = 1.2) +
+  theme_bw()+
+  ggtitle('Prospective Catchers: Salary vs. OBP') + 
+  theme(text = element_text(size=10)) +
+  labs(x='On Base Percentage (OBP)',y='Salary')
+
+```
+
+
+
+```{r}
+catcher <- head(arrange(avail.catchers,desc(OBP)),10)
+catcher<- catcher[,c('playerID','POS','OBP','AB','salary')]
+View(catcher)
+```
+
+
+Francisco Cervelli is the new Toronto Blue Jays catcher!
+Acquired by the Pittsburgh Pirates for $4 million. He is a veteran catcher who had an excellent performance with the Yankees and Pirates. He has a 2018 projection OBP of 0.352 and we can't wait to see his talent on the field.  
+
+
+## Summary
+Spent $10,952,000 recruiting 3 key undervalued players(Kris Bryant, Brandon Belt,and Francisco Cervelli) that will take the Toronto Blue Jays to the 2018 MLB Pennant!!
+
+```{r}
+final_recruits <- subset(combo2,playerID %in% c('bryankr01','beltbr01','cervefr01'))
+final_recruits<- final_recruits[,c('playerID','POS','OBP','AB','salary')]
+final_recruits
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
